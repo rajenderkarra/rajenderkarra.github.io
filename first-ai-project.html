@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>From Web Page to Insight | Rajender Karra</title>
+    <meta
+      name="description"
+      content="A story about building my first AI project: turning a website URL into a useful summary using AI and practical engineering thinking."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <a class="brand" href="index.html">Rajender Karra</a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="index.html#about">About</a>
+          <a href="index.html#experience">Experience</a>
+          <a href="index.html#focus">Focus</a>
+          <a href="projects.html">Projects</a>
+          <a href="blog.html">Blog</a>
+          <a href="resume.html">Resume</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div class="container article-container">
+        <article class="article-card">
+          <p class="eyebrow">Blog · AI Project</p>
+          <h1>From Web Page to Insight: Building My First AI Project</h1>
+          <p class="article-meta">August 2026 · Rajender Karra</p>
+
+          <p>
+            I have spent years working in software and engineering, but one of the most exciting areas I
+            have begun exploring is AI engineering. What surprised me most was how accessible it has become.
+            With a few lines of Python, an API key, and a clear idea, it is possible to build a working AI
+            application in a short time.
+          </p>
+
+          <p>
+            This first project was simple but meaningful: I built a tool that takes a website URL, extracts
+            the page content, and summarizes it using a large language model. The goal was not just to use
+            AI for the sake of it, but to understand how practical AI workflows work in the real world.
+          </p>
+
+          <h2>Why I built it</h2>
+          <p>
+            A lot of the information we consume online is long, noisy, and difficult to process quickly. I
+            wanted to experiment with a system that could turn a webpage into a concise summary, helping a
+            user understand the key points in a few seconds.
+          </p>
+
+          <p>
+            This project became a great way to learn several important ideas at once:
+          </p>
+
+          <ul>
+            <li>how to fetch and clean website content</li>
+            <li>how to design useful prompts for an LLM</li>
+            <li>how to build a simple user-facing AI workflow</li>
+            <li>how AI can turn raw information into a structured and useful output</li>
+          </ul>
+
+          <h2>The architecture</h2>
+          <p>
+            The system is straightforward, but it captures the essence of many AI products. The flow is:
+          </p>
+
+          <ol>
+            <li>accept a URL as input</li>
+            <li>scrape the page content</li>
+            <li>remove unnecessary noise like navigation and scripts</li>
+            <li>send the cleaned text to an LLM</li>
+            <li>return a readable summary</li>
+          </ol>
+
+          <p>
+            This simple pipeline is a good example of AI system design. It is not just a model call; it is a
+            complete workflow that includes data extraction, content preparation, prompt design, and output
+            shaping.
+          </p>
+
+          <h2>What I learned</h2>
+          <p>
+            The biggest lesson was that AI is not magic. It is a tool that depends on context, engineering,
+            and careful design. Good outputs do not happen automatically simply because a model is powerful.
+          </p>
+
+          <p>
+            I learned that:
+          </p>
+
+          <ul>
+            <li>good prompts matter</li>
+            <li>data quality matters</li>
+            <li>context and token usage matter</li>
+            <li>model output must be shaped for real users</li>
+            <li>the model is only one part of the system</li>
+          </ul>
+
+          <p>
+            This was a meaningful step in understanding how AI applications work beyond the polished demo
+            level. It showed me how much of the work is in the surrounding system and how important good
+            engineering decisions are.
+          </p>
+
+          <h2>Why it matters</h2>
+          <p>
+            For me, this project was not just an experiment. It was a practical introduction to AI
+            engineering and product thinking. It showed me that useful AI applications can be built without
+            waiting for perfect infrastructure or massive research environments. You can start with a small
+            idea, test it quickly, and learn by doing.
+          </p>
+
+          <h2>My takeaway</h2>
+          <p>
+            This project gave me a strong foundation for exploring more advanced AI work, product design,
+            and software systems. It also reinforced a simple idea: the best way to learn modern technology
+            is by building.
+          </p>
+
+          <p>
+            I plan to continue documenting this learning journey through more AI experiments, deeper design
+            discussions, and practical engineering notes.
+          </p>
+
+          <div class="article-actions">
+            <a class="btn primary" href="projects.html">View More Projects</a>
+            <a class="btn secondary" href="blog.html">Back to Blog</a>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-wrap">
+        <div>
+          <p class="brand-footer">Rajender Karra</p>
+          <p class="footer-copy">Software engineer, AI learner, and systems thinker.</p>
+        </div>
+
+        <div class="socials">
+          <a href="https://github.com/rajenderkarra" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://www.linkedin.com/in/rajenderkarra" target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href="resume.html">Resume</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
