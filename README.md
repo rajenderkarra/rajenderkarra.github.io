@@ -1,6 +1,6 @@
 # Rajender Karra Personal Website
 
-This repository contains a professional static website for GitHub Pages.
+A professional static website for GitHub Pages, organized around focused content routes and reusable HTML fragments.
 
 ## Local preview
 
@@ -20,20 +20,17 @@ http://localhost:8000
 
 To publish on GitHub Pages, create a repository named `rajenderkarra.github.io` and push the contents here.
 
-## Purpose
+## Structure
 
-This landing page is designed to present:
+- `about/` - professional background and engineering perspective
+- `experience/` - career timeline and delivery experience
+- `focus/` - AI engineering, system design, LLD, and product thinking
+- `blog/ai/` - AI notes and project stories
+- `blog/system-design/` - system design notes
+- `blog/lld/` - low-level design notes
+- `projects/` - enterprise and AI project portfolio
+- `resume/` - online resume and PDF link
+- `contact/` - email, LinkedIn, and GitHub links
+- `pages/header.html` and `pages/footer.html` - shared fragments injected by `script.js`
 
-- professional experience
-- AI learning journey
-- LLD and system design notes
-- project highlights
-- blog / learning content
-
-## Content to add later
-
-- detailed AI project writeups
-- low-level design notes
-- system design studies
-- resume page
-- blog post pages
+The site uses client-side fragment loading so the shared navigation and footer are maintained in one place while remaining compatible with GitHub Pages.

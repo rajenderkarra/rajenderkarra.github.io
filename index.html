@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,21 +16,7 @@
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <header class="site-header">
-      <div class="container nav">
-        <a class="brand" href="index.html">Rajender Karra</a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="index.html#about">About</a>
-          <a href="index.html#experience">Experience</a>
-          <a href="index.html#focus">Focus</a>
-          <a href="projects.html">Projects</a>
-          <a href="blog.html">Blog</a>
-          <a href="resume.html">Resume</a>
-          <a href="#contact">Contact</a>
-        </nav>
-      </div>
-    </header>
+  <body><div data-include="header.html"></div>
 
     <main>
       <section class="hero">
@@ -44,8 +30,8 @@
               intersection of engineering depth, architectural clarity, and business value.
             </p>
             <div class="cta-row">
-              <a class="btn primary" href="projects.html">View Projects</a>
-              <a class="btn secondary" href="blog.html">Read Blog</a>
+              <a class="btn primary" href="projects/">View Projects</a>
+              <a class="btn secondary" href="blog/">Read Blog</a>
             </div>
             <ul class="quick-meta" aria-label="Professional highlights">
               <li>18+ Years Experience</li>
@@ -155,7 +141,7 @@
                 Understanding how LLMs, prompts, model behavior, and AI product workflows fit into real
                 software systems.
               </p>
-              <a href="projects.html">See projects</a>
+              <a href="projects/">See projects</a>
             </article>
 
             <article class="card topic-card">
@@ -164,7 +150,7 @@
                 Balancing scalability, reliability, trade-offs, and architecture decisions in complex
                 product environments.
               </p>
-              <a href="blog.html">Explore concepts</a>
+              <a href="blog/">Explore concepts</a>
             </article>
 
             <article class="card topic-card">
@@ -172,7 +158,7 @@
               <p>
                 Designing for fault tolerance, concurrency, throughput, and resilient service interactions.
               </p>
-              <a href="blog.html">Read notes</a>
+              <a href="blog/">Read notes</a>
             </article>
 
             <article class="card topic-card">
@@ -181,7 +167,7 @@
                 Translating AI capabilities into useful, trustworthy product experiences grounded in user
                 value and engineering reality.
               </p>
-              <a href="projects.html">View work</a>
+              <a href="projects/">View work</a>
             </article>
           </div>
         </div>
@@ -316,7 +302,7 @@
                 Documenting technical learnings, AI concepts, and engineering notes as part of a broader
                 continuous-learning practice.
               </p>
-              <a href="blog.html">Read notes</a>
+              <a href="blog/">Read notes</a>
             </article>
           </div>
         </div>
@@ -337,7 +323,7 @@
                 A practical breakdown of tokens, context windows, temperature, and why modern AI systems
                 feel surprisingly accessible to builders.
               </p>
-              <a href="blog.html">Read article</a>
+              <a href="blog/">Read article</a>
             </article>
 
             <article class="blog-item">
@@ -347,7 +333,7 @@
                 The story behind the first project: scraping a page, summarizing it with an LLM, and
                 learning how AI workflows fit into a usable product.
               </p>
-              <a href="blog.html">Read article</a>
+              <a href="blog/">Read article</a>
             </article>
 
             <article class="blog-item">
@@ -357,29 +343,14 @@
                 A growing set of design principles, class responsibilities, and software modeling ideas for
                 practical engineering work.
               </p>
-              <a href="blog.html">Coming soon</a>
+              <a href="blog/">Coming soon</a>
             </article>
           </div>
         </div>
       </section>
     </main>
 
-    <footer id="contact" class="site-footer">
-      <div class="container footer-wrap">
-        <div>
-          <p class="brand-footer">Rajender Karra</p>
-          <p class="footer-copy">Software engineer, learner, builder, and systems thinker.</p>
-        </div>
-
-        <div class="socials">
-          <a href="https://github.com/rajenderkarra" target="_blank" rel="noreferrer">GitHub</a>
-          <a href="https://www.linkedin.com/in/rajender-karra/" target="_blank" rel="noreferrer">LinkedIn</a>
-          <a href="resume.html">Resume</a>
-          <a href="mailto:karra.rajender@gmail.com">Email</a>
-        </div>
-      </div>
-    </footer>
-
     <script src="script.js"></script>
-  </body>
+  <div data-include="footer.html"></div><script src="script.js"></script></body>
 </html>
+

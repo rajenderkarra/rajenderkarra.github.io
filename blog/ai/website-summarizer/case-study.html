@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Summarizer AI | Rajender Karra</title>
+    <meta
+      name="description"
+      content="Project case study for the Website Summarizer AI app built to fetch web page content and summarize it using an LLM."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+  </head>
+  <body><div data-include="header.html"></div>
+
+    <main class="page-shell">
+      <div class="container article-container">
+        <article class="article-card">
+          <p class="eyebrow">Project Case Study</p>
+          <h1>Website Summarizer AI</h1>
+          <p class="article-meta">AI Project · Python · LLM Integration</p>
+
+          <p>
+            This project was my first hands-on attempt to turn a simple idea into a usable AI workflow: take a
+            website URL, read the content, and summarize it in a concise and readable way.
+          </p>
+
+          <p>
+            It began with a simple question: how hard is it to build a useful AI tool with a modern model and a
+            small amount of engineering work? The answer turned out to be surprisingly approachable.
+          </p>
+
+          <h2>Problem</h2>
+          <p>
+            Online content is often long, noisy, and filled with navigation, ads, and repetitive structure.
+            A user often wants the core idea of a page without reading the entire page. The problem was to turn
+            raw website text into a useful summary with minimal friction.
+          </p>
+
+          <h2>Solution</h2>
+          <p>
+            I built a small system that does the following:
+          </p>
+
+          <ol>
+            <li>accepts a URL from the user</li>
+            <li>fetches the page content</li>
+            <li>removes unwanted HTML elements and noise</li>
+            <li>sends the cleaned content to an LLM</li>
+            <li>returns a short, readable summary</li>
+          </ol>
+
+          <p>
+            The architecture is intentionally simple. It focuses on the core idea: use AI where it adds value,
+            while keeping the data flow understandable and easy to debug.
+          </p>
+
+          <h2>Technology used</h2>
+          <ul>
+            <li>Python</li>
+            <li>Requests</li>
+            <li>BeautifulSoup</li>
+            <li>OpenAI-compatible API workflow</li>
+            <li>Simple interface layer for usability</li>
+          </ul>
+
+          <h2>Key learnings</h2>
+          <p>
+            This project taught several important lessons very quickly:
+          </p>
+
+          <ul>
+            <li>data cleaning matters as much as model choice</li>
+            <li>prompt design strongly affects the output quality</li>
+            <li>simple workflows can still deliver meaningful value</li>
+            <li>AI works best when paired with good problem framing</li>
+          </ul>
+
+          <p>
+            It also helped me understand the difference between a demo and a product. A working prototype is a
+            strong start, but the real value comes from understanding context, reliability, and user experience.
+          </p>
+
+          <h2>Why this project matters</h2>
+          <p>
+            For me, this project was important because it demonstrated something practical: modern AI is no
+            longer restricted to research labs or highly specialized teams. The barrier to entry for building a
+            useful experience has dropped significantly.
+          </p>
+
+          <p>
+            More importantly, it showed me that I do not need to wait for a perfect setup to start learning. I can
+            build small systems, test ideas quickly, and improve the design step by step.
+          </p>
+
+          <h2>Outcome</h2>
+          <p>
+            The result is a working AI-powered summarization app with a clear, understandable flow from input to
+            output. It is simple, practical, and a good example of applied AI engineering.
+          </p>
+
+          <p>
+            This project remains one of my first concrete examples of learning AI by building, rather than only
+            reading about it.
+          </p>
+
+          <div class="article-actions">
+            <a class="btn primary" href="https://github.com/rajenderkarra/website-summarizer-ai" target="_blank" rel="noreferrer">GitHub Repo</a>
+            <a class="btn secondary" href="../../../projects/">Back to Projects</a>
+          </div>
+        </article>
+      </div>
+    </main>
+  <div data-include="footer.html"></div><script src="../../../script.js"></script></body>
+</html>
+
