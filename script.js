@@ -1,7 +1,9 @@
+// Resolve resources from this script's location. This also supports a local
+// preview where the repository is served from a subfolder.
+const siteRoot = new URL(".", document.currentScript.src).href;
+
 document.addEventListener("DOMContentLoaded", async () => {
-  const pageDepth = window.location.pathname.split("/").filter(Boolean).length;
-  const siteRoot = "../".repeat(pageDepth);
-  const includePath = (name) => `${siteRoot}pages/${name}`;
+  const includePath = (name) => new URL(`pages/${name}`, siteRoot).href;
 
   for (const element of document.querySelectorAll("[data-include]")) {
     const response = await fetch(includePath(element.dataset.include));
@@ -9,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   for (const element of document.querySelectorAll("[data-page-include]")) {
-    const pagePath = `${siteRoot}${element.dataset.pageInclude}`;
+    const pagePath = new URL(element.dataset.pageInclude, siteRoot).href;
     const response = await fetch(pagePath);
     if (!response.ok) continue;
 
@@ -30,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   document.querySelectorAll("[data-root-link]").forEach((link) => {
-    link.href = `${siteRoot}${link.dataset.rootLink}`;
+    link.href = new URL(link.dataset.rootLink, siteRoot).href;
   });
 
   const currentPath = window.location.pathname.replace(/\/$/, "");

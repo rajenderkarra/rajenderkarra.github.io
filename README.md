@@ -4,7 +4,20 @@ A professional static website for GitHub Pages, organized around focused content
 
 ## Local preview
 
-Open the folder and run a local web server:
+Run the included PowerShell web server:
+
+```powershell
+.\serve.ps1
+```
+
+If PowerShell blocks local scripts, run it once for this session with:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\serve.ps1
+```
+
+Or, if Python is installed, run:
 
 ```bash
 python -m http.server 8000
