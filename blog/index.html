@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Blog &amp; Notes | Rajender Karra</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
   </head>
   <body>
+    <div data-include="header.html"></div>
+
     <main>
       <section id="blog" class="section">
         <div class="container">
@@ -24,14 +26,14 @@
               <h3>How LLMs Actually Work</h3>
               <p> A practical overview of tokens, context windows, temperature, self-supervision, and why modern
               AI tooling feels powerful once the fundamentals are understood.</p>            
-              <a href="blog/ai/llm-introduction.html">Read article</a>    
+              <a href="ai/llm-introduction.html">Read article</a>
             </article>
             <article class="blog-item">
               <span class="date">August 2026</span>
               <h3>Website Summarizer: Building My First AI Project</h3>
               <p>The story behind the first project: scraping a page, summarizing it with an LLM, 
                 and learning how AI workflows fit into a usable product.</p>
-              <a href="blog/ai/website-summarizer.html">Read article</a>
+              <a href="ai/website-summarizer.html">Read article</a>
             </article>
             <article class="blog-item">
               <span class="date">Upcoming</span>
@@ -43,5 +45,8 @@
         </div>
       </section>
     </main>
+
+    <div data-include="footer.html"></div>
+    <script src="../script.js"></script>
   </body>
 </html>
