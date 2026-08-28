@@ -9,23 +9,44 @@
   <body>
     <div data-include="header.html"></div>
 
-    <main>
-      <section id="blog" class="section">
-        <div class="container">
-          <div class="section-heading blog-intro">
-            <p class="eyebrow">Blog &amp; Notes</p>
-            <h2>Learning in public.</h2>
-            <p>
-              This section captures my journey through AI engineering, low-level design,
-              and system design. The aim is to document what I learn in a way that is
-              clear, useful, and easy to revisit.
-            </p>
+    <main class="page-shell">
+      <div class="container blog-landing">
+        <header class="page-header blog-landing-header">
+          <p class="eyebrow">Blog &amp; Notes</p>
+          <h1>Writing about systems, software, and practical AI.</h1>
+          <p>
+            Notes from building cloud-native software, designing reliable systems,
+            and applying AI in everyday engineering work.
+          </p>
+        </header>
+
+        <section class="blog-category">
+          <div class="section-heading">
+            <p class="eyebrow">AI Engineering</p>
+            <h2>Language models, AI workflows, and practical AI projects.</h2>
           </div>
-          <div data-page-include="blog/ai/index.html"></div>
-          <div data-page-include="blog/system-design/index.html"></div>
-          <div data-page-include="blog/lld/index.html"></div>
-        </div>
-      </section>
+          <p class="blog-category-summary">Explore notes on language models, AI workflows, and hands-on projects.</p>
+          <a class="btn primary section-link" href="ai/">Explore AI notes</a>
+        </section>
+
+        <section class="blog-category">
+          <div class="section-heading">
+            <p class="eyebrow">System Design</p>
+            <h2>Scalability, reliability, distributed systems, and architecture trade-offs.</h2>
+            <p>Practical notes on distributed systems, service boundaries, data flow, scalability, and the trade-offs behind dependable software.</p>
+          </div>
+          <a class="btn primary section-link" href="system-design/">Explore System Design notes</a>
+        </section>
+
+        <section class="blog-category">
+          <div class="section-heading">
+            <p class="eyebrow">Low-Level Design</p>
+            <h2>Class responsibilities, interfaces, patterns, and maintainable design.</h2>
+            <p>Practical notes on object-oriented design, class responsibilities, interfaces, patterns, and modeling decisions that keep software flexible and maintainable.</p>
+          </div>
+          <a class="btn primary section-link" href="lld/">Explore LLD notes</a>
+        </section>
+      </div>
     </main>
 
     <div data-include="footer.html"></div>

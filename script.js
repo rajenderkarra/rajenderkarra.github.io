@@ -3,6 +3,7 @@
 const siteRoot = new URL(".", document.currentScript.src).href;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  document.body.classList.add("is-loading");
   const includePath = (name) => new URL(`pages/${name}`, siteRoot).href;
 
   for (const element of document.querySelectorAll("[data-include]")) {
@@ -42,11 +43,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   document.querySelectorAll("[data-root-link]").forEach((link) => {
-    link.href = new URL(link.dataset.rootLink, siteRoot).href;
+    const rootLink = link.dataset.rootLink;
+    const homePath = new URL("index.html", siteRoot).pathname;
+    const rootPath = new URL(".", siteRoot).pathname.replace(/\/$/, "");
+    const currentPath = window.location.pathname.replace(/\/$/, "");
+    const isHomePage = currentPath === rootPath || currentPath === homePath.replace(/\/$/, "");
+    const destination = rootLink.startsWith("#") && !isHomePage
+      ? `index.html${rootLink}`
+      : rootLink;
+    link.href = new URL(destination, siteRoot).href;
   });
 
   const currentPath = window.location.pathname.replace(/\/$/, "");
   document.querySelectorAll(".nav-links a").forEach((link) => {
     if (link.pathname.replace(/\/$/, "") === currentPath) link.classList.add("active");
   });
+
+  document.body.classList.remove("is-loading");
+
+  // Sections are loaded asynchronously, so perform hash navigation after they exist.
+  if (window.location.hash) {
+    const target = document.getElementById(window.location.hash.slice(1));
+    if (target) target.scrollIntoView();
+  }
 });
