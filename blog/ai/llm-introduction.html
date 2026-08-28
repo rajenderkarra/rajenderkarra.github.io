@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,23 +14,9 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../../../styles.css" />
   </head>
-  <body>
-    <header class="site-header">
-      <div class="container nav">
-        <a class="brand" href="index.html">Rajender Karra</a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="index.html#about">About</a>
-          <a href="index.html#experience">Experience</a>
-          <a href="index.html#focus">Focus</a>
-          <a href="projects.html">Projects</a>
-          <a href="blog.html">Blog</a>
-          <a href="resume.html">Resume</a>
-          <a href="index.html#contact">Contact</a>
-        </nav>
-      </div>
-    </header>
+  <body><div data-include="header.html"></div>
 
     <main class="page-shell">
       <div class="container article-container">
@@ -147,26 +133,12 @@
           </p>
 
           <div class="article-actions">
-            <a class="btn primary" href="projects.html">View Projects</a>
-            <a class="btn secondary" href="blog.html">Back to Blog</a>
+            <a class="btn primary" href="../../../projects/">View Projects</a>
+            <a class="btn secondary" href="../">Back to Blog</a>
           </div>
         </article>
       </div>
     </main>
-
-    <footer class="site-footer">
-      <div class="container footer-wrap">
-        <div>
-          <p class="brand-footer">Rajender Karra</p>
-          <p class="footer-copy">Software engineer, AI learner, and systems thinker.</p>
-        </div>
-
-        <div class="socials">
-          <a href="https://github.com/rajenderkarra" target="_blank" rel="noreferrer">GitHub</a>
-          <a href="https://www.linkedin.com/in/rajender-karra/" target="_blank" rel="noreferrer">LinkedIn</a>
-          <a href="mailto:karra.rajender@gmail.com">Email</a>
-        </div>
-      </div>
-    </footer>
-  </body>
+  <div data-include="footer.html"></div><script src="../../../script.js"></script></body>
 </html>
+
