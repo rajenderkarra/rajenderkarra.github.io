@@ -229,6 +229,17 @@ img {
   letter-spacing: -0.05em;
 }
 
+.blog-intro {
+  max-width: 760px;
+}
+
+.blog-intro p {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .about-grid,
 .card-grid {
   display: grid;
@@ -241,6 +252,10 @@ img {
 
 .three-col {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.project-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .four-col {
@@ -369,6 +384,26 @@ img {
   color: var(--muted);
   margin: 0;
   max-width: 760px;
+}
+
+/* Blog category pages use a compact, consistently left-aligned heading. */
+.blog-section-content {
+  text-align: left;
+}
+
+/* Included category pages already sit inside the blog container. */
+#blog > .container > .blog-section-content {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#blog > .container > .blog-section-content + .blog-section-content {
+  margin-top: 40px;
+}
+
+.blog-section-header h1 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
 }
 
 .list-grid {
@@ -505,6 +540,7 @@ img {
   .hero-grid,
   .about-grid,
   .three-col,
+  .project-grid,
   .timeline-item {
     grid-template-columns: 1fr;
   }

@@ -10,14 +10,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (response.ok) element.outerHTML = await response.text();
   }
 
-  for (const element of document.querySelectorAll("[data-page-include]")) {
+  // Keep resolving placeholders until none remain, so a page can compose
+  // other reusable page sections (for example, blog/index.html).
+  while (true) {
+    const element = document.querySelector("[data-page-include]");
+    if (!element) break;
     const pagePath = new URL(element.dataset.pageInclude, siteRoot).href;
     const response = await fetch(pagePath);
-    if (!response.ok) continue;
+    if (!response.ok) {
+      element.remove();
+      continue;
+    }
 
     const page = new DOMParser().parseFromString(await response.text(), "text/html");
     const content = page.querySelector("main");
-    if (!content) continue;
+    if (!content) {
+      element.remove();
+      continue;
+    }
 
     // Content is inserted into the home page, so make each relative link resolve
     // from the folder of the page it came from, rather than from the site root.

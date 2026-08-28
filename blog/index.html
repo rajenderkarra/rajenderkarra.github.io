@@ -12,36 +12,18 @@
     <main>
       <section id="blog" class="section">
         <div class="container">
-          <div class="section-heading">
+          <div class="section-heading blog-intro">
             <p class="eyebrow">Blog &amp; Notes</p>
             <h2>Learning in public.</h2>
             <p>
-            This section captures my journey through AI engineering, low-level design, and system design.
-            The aim is to document what I learn in a way that is clear, useful, and easy to revisit.
+              This section captures my journey through AI engineering, low-level design,
+              and system design. The aim is to document what I learn in a way that is
+              clear, useful, and easy to revisit.
             </p>
           </div>
-          <div class="blog-list">
-            <article class="blog-item">
-              <span class="date">August 2026</span>
-              <h3>How LLMs Actually Work</h3>
-              <p> A practical overview of tokens, context windows, temperature, self-supervision, and why modern
-              AI tooling feels powerful once the fundamentals are understood.</p>            
-              <a href="ai/llm-introduction.html">Read article</a>
-            </article>
-            <article class="blog-item">
-              <span class="date">August 2026</span>
-              <h3>Website Summarizer: Building My First AI Project</h3>
-              <p>The story behind the first project: scraping a page, summarizing it with an LLM, 
-                and learning how AI workflows fit into a usable product.</p>
-              <a href="ai/website-summarizer.html">Read article</a>
-            </article>
-            <article class="blog-item">
-              <span class="date">Upcoming</span>
-              <h3>Low-Level Design Notes</h3>
-              <p>Notes on clean class design, responsibilities, modeling, and practical design principles for
-              software engineering problems.</p>              
-            </article>
-          </div>
+          <div data-page-include="blog/ai/index.html"></div>
+          <div data-page-include="blog/system-design/index.html"></div>
+          <div data-page-include="blog/lld/index.html"></div>
         </div>
       </section>
     </main>
