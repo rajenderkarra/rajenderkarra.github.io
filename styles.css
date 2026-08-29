@@ -466,6 +466,23 @@ img {
   max-width: 760px;
 }
 
+.resume-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.resume-page-heading .page-header {
+  margin-bottom: 0;
+}
+
+.resume-download {
+  flex: 0 0 auto;
+}
+
 /* Blog category pages use a compact, consistently left-aligned heading. */
 .blog-section-content {
   text-align: left;
@@ -519,17 +536,45 @@ img {
 }
 
 .resume-box {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 28px;
+  display: grid;
+  gap: 1px;
+}
+
+@media (min-width: 821px) {
+  .resume-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
 }
 
 .resume-box ul {
   margin: 18px 0 0;
   padding-left: 20px;
   color: var(--muted);
+}
+
+.experience-section {
+  margin-top: 16px;
+}
+
+.experience-heading {
+  margin: 0 0 12px;
+  color: var(--primary-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.experience-list {
+  display: grid;
+  gap: 1px;
+}
+
+.experience-list .project-card {
+  margin-top: 0 !important;
 }
 
 .article-container {
@@ -642,5 +687,19 @@ img {
 
   .hero {
     padding-top: 60px;
+  }
+
+  .resume-page-heading {
+    align-items: flex-start;
+  }
+
+  .resume-download,
+  .resume-download .btn {
+    width: 100%;
+  }
+
+  .list-card,
+  .experience-list .project-card {
+    padding: 20px;
   }
 }
