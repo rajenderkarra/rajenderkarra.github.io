@@ -503,6 +503,19 @@ img {
   font-size: clamp(1.8rem, 3vw, 2.6rem);
 }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  color: var(--primary-dark);
+}
+
 .list-grid {
   display: grid;
   gap: 16px;
