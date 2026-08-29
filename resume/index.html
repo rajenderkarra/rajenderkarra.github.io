@@ -20,8 +20,8 @@
 
     <main class="page-shell">
       <div class="container">
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
-          <header class="page-header" style="margin-bottom: 20px;">
+        <div class="resume-page-heading">
+          <header class="page-header">
             <p class="eyebrow">Resume</p>
             <h1>Professional summary.</h1>
             <p>
@@ -31,8 +31,10 @@
             </p>
           </header>
 
-          <div class="cta-row" style="margin-top: 0; margin-bottom: 20px;">
-            <a class="btn primary" href="Rajender_Karra_Resume.pdf" download>Download Resume</a>
+          <div class="resume-download">
+            <a class="btn primary" href="Rajender_Karra_Resume.pdf" download aria-label="Download Rajender Karra's resume as a PDF">
+              Download Resume
+            </a>
           </div>
         </div>
 
@@ -92,9 +94,9 @@
               <li>Delivered multiple production releases adhering to enterprise banking quality, security, and compliance standards.</li>
             </ul>
           </div>
-          <div class="list-card">
-            <span class="meta-role">Professional Experience</span>
-            <div style="margin-top: 16px;">
+          <section class="experience-section" aria-labelledby="professional-experience">
+            <h2 id="professional-experience" class="experience-heading">Professional Experience</h2>
+            <div class="experience-list">
               <article class="card project-card">
                 <div class="project-tag">Banking</div>
                 <h3>Next Generation Collections Platform (C48)</h3>
@@ -173,7 +175,7 @@
                 <p><strong>Tech Stack:</strong> J2SE 5.0, EJB, XSL, XML, Web Services, SOA, Oracle FLEXCUBE Direct Banking Framework, IBM MQ, IBM WebSphere 7.1, Oracle 11g, Eclipse, HTML, JavaScript</p>
               </article>
             </div>
-          </div>
+          </section>
         </section>
       </div>
     </main>
