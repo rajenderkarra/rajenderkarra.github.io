@@ -635,6 +635,24 @@ img {
   letter-spacing: 0.06em;
 }
 
+.article-diagram {
+  margin: 28px 0;
+}
+
+.article-diagram img {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+}
+
+.article-diagram figcaption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .article-actions {
   display: flex;
   gap: 16px;
