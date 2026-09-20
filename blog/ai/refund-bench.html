@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Refund Bench | Rajender Karra</title>
+    <meta
+      name="description"
+      content="How to design a reliable LLM refund adjudication system using independent judges, frozen evidence, deterministic pricing, and asynchronous workers."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles.css" />
+  </head>
+  <body>
+    <div data-include="header.html"></div>
+
+    <main class="page-shell">
+      <div class="container article-container">
+        <article class="article-card">
+          <p class="eyebrow">Blog · AI Architecture · Agentic Systems</p>
+          <h1>The Refund Bench: Building a Reliable LLM Agent for Automated Refund Decisions</h1>
+          <p class="article-meta">September 2026 · Rajender Karra</p>
+
+          <p>
+            A customer submits one angry paragraph. Inside it are several different accusations: some are
+            supported by evidence, some are contradicted, and one may be impossible to verify. How should an AI
+            system decide what to refund without paying twice or quietly rejecting a legitimate complaint?
+          </p>
+
+          <p>
+            The Refund Bench treats the complaint as a set of separate claims. It extracts each grievance,
+            evaluates it against a frozen evidence snapshot, asks several independent LLM judges for a ruling,
+            counts their votes in code, and lets deterministic business rules decide how much money can move.
+          </p>
+
+          <h2>The customer complaint</h2>
+          <p>
+            Consider this complaint from a food delivery app:
+          </p>
+
+          <blockquote>
+            <p>
+              &ldquo;Ordered at 8:15pm and the food showed up at 9:40pm. We had guests over, it was embarrassing. Two
+              of the four were missing completely. The raita had leaked all over the inside of the bag. And the
+              delivery guy was rude when I asked him about it. Honestly the worst experience I've had on this app
+              - refund everything.&rdquo;
+            </p>
+          </blockquote>
+
+          <p>
+            A human may see this as one emotional complaint. The system should see four checkable grievances:
+          </p>
+
+          <ol>
+            <li><strong>Late delivery:</strong> the order arrived 85 minutes after it was placed.</li>
+            <li><strong>Missing items:</strong> two of the four Hyderabadi Biryani units were not delivered.</li>
+            <li><strong>Packaging problem:</strong> the raita container leaked inside the delivery bag.</li>
+            <li><strong>Partner conduct:</strong> the delivery partner behaved rudely when asked about the missing items.</li>
+          </ol>
+
+          <p>
+            The extractor should ignore “we had guests over, it was embarrassing” because it is context and
+            emotion. It should ignore “the worst experience I've had” because it is an opinion. It should ignore
+            “refund everything” because it is a demand, not a claim that evidence can verify.
+          </p>
+
+          <p>
+            Therefore, this complaint produces <strong>four grievances</strong>. That number is not just useful
+            for reporting. It determines the judging workload: four grievances multiplied by three independent
+            judges creates twelve judgement calls.
+          </p>
+
+          <h2>What the system needs</h2>
+          <p>
+            A production implementation needs an API service, an LLM provider with structured output, a database,
+            a durable queue, background workers, and a payment integration. The system should also provide logs,
+            metrics, tracing, retries, dead-letter handling, and a human-review interface.
+          </p>
+
+          <p>
+            The most important boundary is that the LLM does not directly control the payment amount. The model
+            can interpret evidence and write an explanation. Application code counts votes, applies pricing rules,
+            enforces the approval cap, and authorizes money movement.
+          </p>
+
+          <h2>Architecture</h2>
+          <p>
+            The diagram shows the full path before we walk through each stage: a food delivery complaint enters
+            through the API, workers adjudicate it against frozen evidence, and application code controls the final
+            payment decision.
+          </p>
+
+          <figure class="article-diagram">
+            <button class="diagram-trigger" type="button" aria-label="Open the architecture diagram in a larger view">
+              <img
+                src="refund-bench-architecture.png"
+                alt="Architecture flow from a food delivery customer complaint through a REST API, ledger and transactional outbox, Kafka or SQS, worker pool, frozen evidence, grievance extraction, independent judges, code-based voting and pricing, approval cap, human review, and idempotent settlement."
+              />
+            </button>
+            <figcaption>
+              Select the diagram to inspect it in a larger view. The model interprets the complaint and writes the
+              explanation; application code controls votes, pricing, approval limits, and payment execution.
+            </figcaption>
+          </figure>
+
+          <h2>Stage 1: Extract atomic grievances</h2>
+          <p>
+            The first model call receives the complaint and the order's line items. It identifies statements about
+            events or conditions that evidence could confirm or contradict.
+          </p>
+
+          <pre class="json-block"><code>[
+  {
+    "grievance_id": "g1",
+    "text": "The order was delivered 85 minutes after it was placed.",
+    "category": "LATE_DELIVERY"
+  },
+  {
+    "grievance_id": "g2",
+    "text": "Two of the four Hyderabadi Biryani units ordered were not delivered.",
+    "category": "MISSING_ITEM"
+  },
+  {
+    "grievance_id": "g3",
+    "text": "The raita container leaked inside the delivery bag.",
+    "category": "PACKAGING"
+  },
+  {
+    "grievance_id": "g4",
+    "text": "The delivery partner behaved rudely when asked about the missing items.",
+    "category": "PARTNER_CONDUCT"
+  }
+]</code></pre>
+
+          <p>
+            Notice that “two of the four” has been made self-contained by resolving it against the order. The same
+            process resolves vague references such as “him” and “it”. The extractor must not decide whether the
+            claims are true. Extraction and judgement are separate stages.
+          </p>
+
+          <h3>Extraction prompt</h3>
+          <pre class="prompt-block"><code>You are a precise dispute-intake assistant.
+
+Given a customer complaint and the order's line items,
+extract every atomic, checkable grievance.
+
+Rules:
+- A grievance is a statement about something that happened
+  to THIS order, which evidence could confirm or contradict.
+- Exclude feelings, opinions, demands, and rhetorical questions.
+- Do NOT judge whether the grievance is true. Only extract it.
+- Each grievance must be self-contained.
+- Resolve pronouns and vague references against the order's line items.
+- Return ONLY a JSON array.
+
+Categories:
+LATE_DELIVERY | MISSING_ITEM | WRONG_ITEM | QUALITY |
+PACKAGING | PARTNER_CONDUCT | BILLING
+
+Schema:
+[{ "grievance_id": "&lt;id&gt;",
+   "text": "&lt;standalone grievance&gt;",
+   "category": "&lt;category&gt;",
+   "span_start": &lt;integer&gt;, "span_end": &lt;integer&gt; }]
+
+Complaint: {{complaint_text}}
+Order:     {{line_items_json}}</code></pre>
+
+          <h2>Stage 2: Freeze the evidence</h2>
+          <p>
+            Before any judgement begins, the system creates an immutable evidence snapshot. A typical snapshot
+            might contain the order timestamps, delivery SLA, line items, pickup weight, partner rating, and any
+            recorded packaging information.
+          </p>
+
+          <pre class="json-block"><code>{
+  "order_id": "order-1840",
+  "placed_at": "20:15",
+  "delivered_at": "21:40",
+  "delivery_sla_minutes": 45,
+  "line_items": [
+    { "name": "Hyderabadi Biryani", "quantity": 4, "unit_price": 320 },
+    { "name": "Raita", "quantity": 1, "unit_price": 60 }
+  ],
+  "pickup_weight_expected_kg": 2.4,
+  "pickup_weight_actual_kg": 1.2,
+  "partner_rating_at_handover": 5,
+  "packaging_condition_recorded": false
+}</code></pre>
+
+          <p>
+            The snapshot matters because operational data changes. A partner rating may be updated, a bill may be
+            edited, or a reconciliation job may run later. If a retry observes different evidence, the same dispute
+            could receive a different result. Every judge must see the same snapshot, identified by a version or
+            content hash.
+          </p>
+
+          <h2>Stage 3: Ask independent judges</h2>
+          <p>
+            Each grievance is sent to three independent judges. With four extracted grievances:
+          </p>
+
+          <pre class="code-block"><code>4 grievances x 3 judges = 12 judge calls</code></pre>
+
+          <p>
+            Each judge receives one grievance and the same evidence snapshot. Judges do not see one another's
+            responses. Otherwise, later judges may anchor on earlier answers and the system will count one opinion
+            three times instead of counting three independent opinions.
+          </p>
+
+          <h3>Judging prompt</h3>
+          <pre class="prompt-block"><code>You are an impartial claims adjudicator.
+
+Rule on the following grievance using ONLY the evidence given.
+
+Grievance: {{grievance_text}}
+Evidence:  {{evidence_snapshot_json}}
+
+Rulings:
+- UPHELD: the evidence supports the grievance.
+- REJECTED: the evidence contradicts the grievance.
+- ESCALATE: the evidence is silent or ambiguous.
+
+Rules:
+- Pick exactly one ruling.
+- Do not reason about what is typical, likely, or fair.
+- Rule only on the evidence provided.
+- If the evidence does not address the grievance,
+  return ESCALATE, never REJECTED.
+- Return only valid JSON.
+
+Schema:
+{
+  "ruling": "UPHELD" | "REJECTED" | "ESCALATE",
+  "confidence": 0.0,
+  "evidence_cited": "&lt;fields used&gt;",
+  "reasoning": "&lt;one to three sentences&gt;"
+}</code></pre>
+
+          <h2>Stage 4: Count votes in code</h2>
+          <p>
+            The application counts the rulings. It does not ask another model to determine the majority.
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <caption>How the bench turns judge votes into an outcome</caption>
+              <thead>
+                <tr><th scope="col">Grievance</th><th scope="col">Evidence</th><th scope="col">Votes</th><th scope="col">Outcome</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>g1: Late delivery</td><td>85 minutes versus a 45-minute SLA</td><td class="vote-cell">U, U, U</td><td class="outcome-upheld">Upheld</td></tr>
+                <tr><td>g2: Missing items</td><td>Pickup weight was half the expected weight</td><td class="vote-cell">U, U, U</td><td class="outcome-upheld">Upheld</td></tr>
+                <tr><td>g3: Leaked raita</td><td>No packaging evidence exists</td><td class="vote-cell">U, E, E</td><td class="outcome-escalate">Escalate</td></tr>
+                <tr><td>g4: Rude partner</td><td>Five-star rating at handover</td><td class="vote-cell">R, R, R</td><td class="outcome-rejected">Rejected</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            The split for g3 is valuable. One judge believed the complaint, but two recognized that the evidence was
+            silent. The result is escalation rather than an automatic refund. A 3-0 verdict is stronger than a 2-1
+            verdict, even when the majority outcome is the same.
+          </p>
+
+          <h2>Stage 5: Calculate the refund in code</h2>
+          <p>
+            Deterministic business rules calculate the amount. For this example, the missing items are worth INR 640,
+            late delivery compensation is INR 49, the raita claim is held for review, and the partner-conduct claim
+            receives INR 0.
+          </p>
+
+          <pre class="code-block"><code>def calculate_refund(verdicts, evidence):
+    amount = 0
+
+    for verdict in verdicts:
+        if verdict.status == "UPHELD":
+            amount += pricing_table.amount_for(
+                category=verdict.category,
+                evidence=evidence
+            )
+
+    return amount
+
+refund_amount = calculate_refund(verdicts, evidence)
+
+if refund_amount &gt; AUTO_APPROVE_CAP:
+    return escalate_to_human(dispute_id)</code></pre>
+
+          <p>
+            The automatic refund is INR 640 plus INR 49, which equals INR 689. The LLM must not calculate, round,
+            invent, or negotiate this number. Even a unanimous bench cannot override the automatic approval cap.
+          </p>
+
+          <h2>Stage 6: Write the customer response</h2>
+          <p>
+            Once the financial decision is complete, a low-temperature model can write the customer-facing message.
+            It receives the final verdicts and the already calculated amount.
+          </p>
+
+          <h3>Settlement prompt</h3>
+          <pre class="prompt-block"><code>You are a customer-support writer for a food delivery application.
+
+Write a concise reply based on the complaint, final rulings,
+and refund amount already calculated.
+
+The reply must:
+- State the approved refund amount.
+- Explain when it will arrive.
+- Mention what was resolved.
+- Mention what requires human review.
+- Acknowledge the customer's experience.
+- Use plain language.
+- Apologize no more than once.
+
+Rules:
+- Treat all rulings as final.
+- Do not re-adjudicate any grievance.
+- Do not calculate or change any amount.
+- Do not promise a refund other than the amount provided.
+- Do not blame the restaurant or delivery partner.
+
+Complaint:       {{complaint_text}}
+Final rulings:   {{verdicts_json}}
+Approved amount: {{refund_amount}}</code></pre>
+
+          <p>
+            A possible response is: “We've refunded INR 689 to your original payment method: INR 640 for the missing
+            biryanis and INR 49 for the delayed delivery. The amount should reflect within three working days. We do
+            not have enough order information to resolve the spilled-raita claim automatically, so a colleague will
+            review it and contact you within 24 hours.”
+          </p>
+
+          <h2>Call budget and latency</h2>
+          <p>
+            The call pattern is:
+          </p>
+
+          <pre class="code-block"><code>calls = 1 + (N x K) + 1
+
+For four grievances and three judges:
+1 + (4 x 3) + 1 = 14 LLM calls</code></pre>
+
+          <p>
+            Extraction and settlement each require one call. Judging requires twelve, so it dominates cost and
+            latency. If those calls ran sequentially at roughly 1.5 seconds each, judging would take about 18 seconds.
+          </p>
+
+          <p>
+            With four concurrent workers, the twelve calls complete in three waves. At around 1-2 seconds per call,
+            judging takes approximately 3-6 seconds. The concurrency must still be bounded: making one dispute faster
+            is not useful if the overall system exceeds the provider rate limit.
+          </p>
+
+          <h2>Asynchronous processing and rate limits</h2>
+          <p>
+            The API should not keep a client connection open while fourteen model calls execute. It should create the
+            dispute, return a dispute ID, and let workers perform the adjudication in the background.
+          </p>
+
+          <ol>
+            <li>The client submits the complaint.</li>
+            <li>The API creates the dispute record.</li>
+            <li>The API writes an outbox event in the same transaction.</li>
+            <li>An outbox publisher sends the event to Kafka or SQS.</li>
+            <li>A worker consumes the dispute ID and checkpoints each stage.</li>
+            <li>The client polls for status or receives a callback.</li>
+          </ol>
+
+          <h3>Why use a transactional outbox?</h3>
+          <p>
+            Without an outbox, the database write could succeed while queue publishing fails. The dispute would exist
+            in the database but no worker would ever process it. The outbox stores the dispute and its pending queue
+            event in the same database transaction, preventing that lost-request failure mode.
+          </p>
+
+          <h3>Handling HTTP 429 responses</h3>
+          <p>
+            At peak load, 200 disputes per minute multiplied by 14 calls produces approximately 2,800 LLM calls per
+            minute. Rate-limit responses are therefore expected operating conditions.
+          </p>
+
+          <pre class="code-block"><code>Attempt 1: wait 1 second + random jitter
+Attempt 2: wait 2 seconds + random jitter
+Attempt 3: wait 4 seconds + random jitter
+Attempt 4: wait 8 seconds + random jitter</code></pre>
+
+          <p>
+            Exponential backoff reduces pressure over time. Jitter prevents many workers that failed together from
+            retrying at exactly the same moment and causing another synchronized burst.
+          </p>
+
+          <h2>Storage and retention</h2>
+          <p>
+            A refund decision should preserve enough information to answer one question: why did this refund happen?
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Rows</th><th>Approximate size</th></tr></thead>
+              <tbody>
+                <tr><td><code>disputes</code></td><td>1</td><td>1 KB</td></tr>
+                <tr><td><code>grievances</code></td><td>4</td><td>6 KB</td></tr>
+                <tr><td><code>evidence_snapshots</code></td><td>1</td><td>3 KB</td></tr>
+                <tr><td><code>judge_rulings</code></td><td>12</td><td>24 KB</td></tr>
+                <tr><td><strong>Total</strong></td><td><strong>18</strong></td><td><strong>Approximately 35 KB</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            The raw judge rulings are the largest part of the record. Keeping all twelve rulings supports customer
+            appeals, internal investigations, model evaluation, debugging, and compliance audits.
+          </p>
+
+          <p>
+            At 30,000 disputes per day, 35 KB per dispute is approximately 1 GB per day, or about 380 GB per year.
+            Raw judge rulings can remain in hot storage for 90 days and then move to cold storage, while financial
+            records and evidence snapshots may require longer retention.
+          </p>
+
+          <h2>Complete workflow pseudocode</h2>
+          <pre class="code-block"><code>function process_dispute(complaint_text, order_id):
+
+    dispute_id = hash(complaint_text + order_id)
+
+    existing = ledger.get(dispute_id)
+
+    if existing.status == SETTLED:
+        return existing.settlement
+
+    if existing.status == PROCESSING:
+        return existing.status
+
+    ledger.create_if_missing(
+        dispute_id=dispute_id,
+        complaint=complaint_text,
+        order_id=order_id,
+        status=RECEIVED
+    )
+
+    evidence = evidence_service.snapshot(order_id)
+    ledger.save_evidence(dispute_id, evidence, status=INTAKE)
+
+    grievances = extraction_model.run(
+        complaint=complaint_text,
+        line_items=evidence.line_items
+    )
+    validate_grievances(grievances)
+    ledger.save_grievances(dispute_id, grievances, status=JUDGING)
+
+    judging_tasks = []
+    for grievance in grievances:
+        for judge_number in range(3):
+            judging_tasks.append({
+                "dispute_id": dispute_id,
+                "grievance": grievance,
+                "evidence": evidence,
+                "judge_number": judge_number
+            })
+
+    rulings = parallel_execute(
+        function=judge_grievance,
+        tasks=judging_tasks,
+        batch_size=4,
+        retry_policy=exponential_backoff_with_jitter
+    )
+
+    ledger.save_raw_rulings(dispute_id, rulings)
+    verdicts = count_votes_by_grievance(rulings)
+    refund_amount = pricing.compute(verdicts, evidence)
+
+    if refund_amount &gt; AUTO_APPROVE_CAP:
+        ledger.mark_escalated(dispute_id)
+        return human_review(dispute_id)
+
+    ledger.save_verdicts(dispute_id, verdicts, refund_amount, status=TALLIED)
+
+    message = settlement_writer.run(
+        complaint=complaint_text,
+        verdicts=verdicts,
+        amount=refund_amount
+    )
+
+    payment = payments.refund(
+        idempotency_key=dispute_id,
+        amount=refund_amount
+    )
+
+    ledger.save_settlement(
+        dispute_id=dispute_id,
+        message=message,
+        payment=payment,
+        status=SETTLED
+    )
+
+    return {
+        "dispute_id": dispute_id,
+        "refund_amount": refund_amount,
+        "message": message,
+        "verdicts": verdicts
+    }</code></pre>
+
+          <h2>Challenges and troubleshooting</h2>
+          <h3>All judges return the same answer</h3>
+          <p>
+            Check the temperature and request construction. At temperature zero, repeated calls may be effectively
+            deterministic. Use a non-zero temperature for judgement calls, while keeping settlement generation at a
+            low temperature.
+          </p>
+
+          <h3>The extractor drops unsupported claims</h3>
+          <p>
+            If the extractor removes “the delivery partner was rude” because there is no direct evidence, extraction
+            and judgement have been mixed together. Add an explicit instruction: “Do not judge whether the grievance
+            is true. Only extract it.”
+          </p>
+
+          <h3>Missing evidence becomes rejection</h3>
+          <p>
+            If the system has no packaging record, it cannot conclude that the raita did not leak. The correct result
+            is escalation, not rejection.
+          </p>
+
+          <pre class="code-block"><code>Evidence supports claim      -> UPHELD
+Evidence contradicts claim   -> REJECTED
+Evidence is silent/ambiguous -> ESCALATE</code></pre>
+
+          <h3>Duplicate refunds</h3>
+          <p>
+            Workers can retry after timeouts. Use the same idempotency key for every payment retry:
+            <code>idempotency_key = dispute_id</code>. The ledger should also prevent a settled dispute from being
+            processed again.
+          </p>
+
+          <h3>Queue messages are processed twice</h3>
+          <p>
+            SQS and similar queues provide at-least-once delivery. Use a visibility timeout longer than the expected
+            job duration, heartbeats for long-running jobs, stage checkpoints, idempotent processing, and payment
+            idempotency keys.
+          </p>
+
+          <h3>The refund exceeds the cap</h3>
+          <p>
+            Enforce the cap in application code before calling the payment provider. Do not branch a payout on the
+            model's confidence value. Confidence is model-generated; the cap is a deterministic safety boundary.
+          </p>
+
+          <h2>Trade-offs</h2>
+          <div class="table-wrap">
+            <table>
+              <caption>Design choices and the operational cost they introduce</caption>
+              <thead><tr><th scope="col">Design choice</th><th scope="col">Benefit</th><th scope="col">Trade-off</th></tr></thead>
+              <tbody>
+                <tr><td>Three judges per grievance</td><td>Reduces the impact of one inconsistent response</td><td>Increases call volume and cost</td></tr>
+                <tr><td>Parallel judging</td><td>Reduces latency</td><td>Requires rate-limit and concurrency controls</td></tr>
+                <tr><td>Frozen evidence</td><td>Makes decisions reproducible</td><td>Requires additional storage</td></tr>
+                <tr><td>Asynchronous workers</td><td>Handles bursts and retries</td><td>Introduces eventual consistency</td></tr>
+                <tr><td>Transactional outbox</td><td>Prevents lost queue events</td><td>Adds publishing infrastructure</td></tr>
+                <tr><td>Human escalation</td><td>Avoids unsafe automatic rejection</td><td>Requires operational capacity</td></tr>
+                <tr><td>Code-based pricing</td><td>Prevents invented refund amounts</td><td>Requires explicit business rules</td></tr>
+                <tr><td>Approval cap</td><td>Limits financial blast radius</td><td>Large valid refunds need manual approval</td></tr>
+                <tr><td>Full ruling retention</td><td>Enables audits and debugging</td><td>Creates storage and governance responsibilities</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2>Conclusion: What makes the bench reliable?</h2>
+          <p>
+            The Refund Bench turns one emotional paragraph into four explicit, testable grievances: late delivery,
+            missing items, leaked packaging, and partner conduct. Each grievance is evaluated independently against the
+            same frozen evidence.
+          </p>
+
+          <ul>
+            <li>Extract grievances before judging them.</li>
+            <li>Resolve vague references into self-contained claims.</li>
+            <li>Freeze evidence before model evaluation.</li>
+            <li>Run independent judges without shared history.</li>
+            <li>Count votes in application code.</li>
+            <li>Treat missing evidence as escalation, not rejection.</li>
+            <li>Calculate refund amounts deterministically.</li>
+            <li>Enforce a hard automatic approval cap.</li>
+            <li>Use idempotency keys to prevent duplicate payments.</li>
+            <li>Use queues and workers for asynchronous processing.</li>
+            <li>Retry rate-limit failures with exponential backoff and jitter.</li>
+            <li>Retain raw rulings for auditability and debugging.</li>
+          </ul>
+
+          <p>
+            The key boundary is simple: <strong>the model can interpret the complaint and write the explanation, but
+            the application decides whether money moves and how much.</strong> That separation turns an impressive
+            prototype into a system that can be operated responsibly.
+          </p>
+
+          <div class="article-actions">
+            <a class="btn secondary" href="index.html">Back to AI Notes</a>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <div data-include="footer.html"></div>
+    <script src="../../script.js"></script>
+  </body>
+</html>
