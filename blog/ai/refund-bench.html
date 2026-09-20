@@ -108,6 +108,11 @@
             </figcaption>
           </figure>
 
+          <p class="workflow-note">
+            <strong>Decision workflow</strong>
+            <span>The six stages below describe the business decision workflow performed inside that system.</span>
+          </p>
+
           <h2>Stage 1: Extract atomic grievances</h2>
           <p>
             The first model call receives the complaint and the order's line items. It identifies statements about
@@ -336,6 +341,15 @@ Approved amount: {{refund_amount}}</code></pre>
             review it and contact you within 24 hours.”
           </p>
 
+          <section class="technical-group" aria-labelledby="operational-considerations-title">
+            <div class="technical-group-heading">
+              <h2 id="operational-considerations-title">Operational considerations</h2>
+              <p>
+                The decision workflow explains how a refund is adjudicated. These sections explain how the system
+                runs reliably in production.
+              </p>
+            </div>
+
           <h2>Call budget and latency</h2>
           <p>
             The call pattern is:
@@ -423,6 +437,8 @@ Attempt 4: wait 8 seconds + random jitter</code></pre>
             Raw judge rulings can remain in hot storage for 90 days and then move to cold storage, while financial
             records and evidence snapshots may require longer retention.
           </p>
+
+          </section>
 
           <h2>Complete workflow pseudocode</h2>
           <pre class="code-block"><code>function process_dispute(complaint_text, order_id):
