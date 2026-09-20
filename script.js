@@ -61,6 +61,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.body.classList.remove("is-loading");
 
+  const diagramTrigger = document.querySelector(".diagram-trigger");
+  if (diagramTrigger) {
+    const diagramImage = diagramTrigger.querySelector("img");
+    const lightbox = document.createElement("div");
+    lightbox.className = "diagram-lightbox";
+    lightbox.hidden = true;
+    lightbox.setAttribute("role", "dialog");
+    lightbox.setAttribute("aria-modal", "true");
+    lightbox.setAttribute("aria-label", "Larger architecture diagram");
+    lightbox.innerHTML = `
+      <button class="diagram-lightbox-close" type="button" aria-label="Close enlarged architecture diagram">&times;</button>
+      <img src="${diagramImage.src}" alt="${diagramImage.alt}">
+    `;
+    document.body.appendChild(lightbox);
+
+    const closeButton = lightbox.querySelector(".diagram-lightbox-close");
+    const closeLightbox = () => {
+      lightbox.hidden = true;
+      document.body.classList.remove("lightbox-open");
+      diagramTrigger.focus();
+    };
+
+    diagramTrigger.addEventListener("click", () => {
+      lightbox.hidden = false;
+      document.body.classList.add("lightbox-open");
+      closeButton.focus();
+    });
+    closeButton.addEventListener("click", closeLightbox);
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) closeLightbox();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
+    });
+  }
+
   // Sections are loaded asynchronously, so perform hash navigation after they exist.
   if (window.location.hash) {
     const target = document.getElementById(window.location.hash.slice(1));

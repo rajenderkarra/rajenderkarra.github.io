@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="../../styles.css" />
   </head>
   <body>
     <div data-include="header.html"></div>
@@ -40,15 +40,15 @@
 
           <h2>The customer complaint</h2>
           <p>
-            Consider this complaint:
+            Consider this complaint from a food delivery app:
           </p>
 
           <blockquote>
             <p>
-              Ordered at 8:15pm and the food showed up at 9:40pm. We had guests over, it was embarrassing. Two
+              &ldquo;Ordered at 8:15pm and the food showed up at 9:40pm. We had guests over, it was embarrassing. Two
               of the four were missing completely. The raita had leaked all over the inside of the bag. And the
               delivery guy was rude when I asked him about it. Honestly the worst experience I've had on this app
-              - refund everything.
+              - refund everything.&rdquo;
             </p>
           </blockquote>
 
@@ -88,13 +88,33 @@
             enforces the approval cap, and authorizes money movement.
           </p>
 
+          <h2>Architecture</h2>
+          <p>
+            The diagram shows the full path before we walk through each stage: a food delivery complaint enters
+            through the API, workers adjudicate it against frozen evidence, and application code controls the final
+            payment decision.
+          </p>
+
+          <figure class="article-diagram">
+            <button class="diagram-trigger" type="button" aria-label="Open the architecture diagram in a larger view">
+              <img
+                src="refund-bench-architecture.png"
+                alt="Architecture flow from a food delivery customer complaint through a REST API, ledger and transactional outbox, Kafka or SQS, worker pool, frozen evidence, grievance extraction, independent judges, code-based voting and pricing, approval cap, human review, and idempotent settlement."
+              />
+            </button>
+            <figcaption>
+              Select the diagram to inspect it in a larger view. The model interprets the complaint and writes the
+              explanation; application code controls votes, pricing, approval limits, and payment execution.
+            </figcaption>
+          </figure>
+
           <h2>Stage 1: Extract atomic grievances</h2>
           <p>
             The first model call receives the complaint and the order's line items. It identifies statements about
             events or conditions that evidence could confirm or contradict.
           </p>
 
-          <pre><code>[
+          <pre class="json-block"><code>[
   {
     "grievance_id": "g1",
     "text": "The order was delivered 85 minutes after it was placed.",
@@ -124,7 +144,7 @@
           </p>
 
           <h3>Extraction prompt</h3>
-          <pre><code>You are a precise dispute-intake assistant.
+          <pre class="prompt-block"><code>You are a precise dispute-intake assistant.
 
 Given a customer complaint and the order's line items,
 extract every atomic, checkable grievance.
@@ -158,7 +178,7 @@ Order:     {{line_items_json}}</code></pre>
             recorded packaging information.
           </p>
 
-          <pre><code>{
+          <pre class="json-block"><code>{
   "order_id": "order-1840",
   "placed_at": "20:15",
   "delivered_at": "21:40",
@@ -185,7 +205,7 @@ Order:     {{line_items_json}}</code></pre>
             Each grievance is sent to three independent judges. With four extracted grievances:
           </p>
 
-          <pre><code>4 grievances x 3 judges = 12 judge calls</code></pre>
+          <pre class="code-block"><code>4 grievances x 3 judges = 12 judge calls</code></pre>
 
           <p>
             Each judge receives one grievance and the same evidence snapshot. Judges do not see one another's
@@ -194,7 +214,7 @@ Order:     {{line_items_json}}</code></pre>
           </p>
 
           <h3>Judging prompt</h3>
-          <pre><code>You are an impartial claims adjudicator.
+          <pre class="prompt-block"><code>You are an impartial claims adjudicator.
 
 Rule on the following grievance using ONLY the evidence given.
 
@@ -229,14 +249,15 @@ Schema:
 
           <div class="table-wrap">
             <table>
+              <caption>How the bench turns judge votes into an outcome</caption>
               <thead>
-                <tr><th>Grievance</th><th>Evidence</th><th>Votes</th><th>Outcome</th></tr>
+                <tr><th scope="col">Grievance</th><th scope="col">Evidence</th><th scope="col">Votes</th><th scope="col">Outcome</th></tr>
               </thead>
               <tbody>
-                <tr><td>g1: Late delivery</td><td>85 minutes versus a 45-minute SLA</td><td>U, U, U</td><td>Upheld</td></tr>
-                <tr><td>g2: Missing items</td><td>Pickup weight was half the expected weight</td><td>U, U, U</td><td>Upheld</td></tr>
-                <tr><td>g3: Leaked raita</td><td>No packaging evidence exists</td><td>U, E, E</td><td>Escalate</td></tr>
-                <tr><td>g4: Rude partner</td><td>Five-star rating at handover</td><td>R, R, R</td><td>Rejected</td></tr>
+                <tr><td>g1: Late delivery</td><td>85 minutes versus a 45-minute SLA</td><td class="vote-cell">U, U, U</td><td class="outcome-upheld">Upheld</td></tr>
+                <tr><td>g2: Missing items</td><td>Pickup weight was half the expected weight</td><td class="vote-cell">U, U, U</td><td class="outcome-upheld">Upheld</td></tr>
+                <tr><td>g3: Leaked raita</td><td>No packaging evidence exists</td><td class="vote-cell">U, E, E</td><td class="outcome-escalate">Escalate</td></tr>
+                <tr><td>g4: Rude partner</td><td>Five-star rating at handover</td><td class="vote-cell">R, R, R</td><td class="outcome-rejected">Rejected</td></tr>
               </tbody>
             </table>
           </div>
@@ -254,7 +275,7 @@ Schema:
             receives INR 0.
           </p>
 
-          <pre><code>def calculate_refund(verdicts, evidence):
+          <pre class="code-block"><code>def calculate_refund(verdicts, evidence):
     amount = 0
 
     for verdict in verdicts:
@@ -283,7 +304,7 @@ if refund_amount &gt; AUTO_APPROVE_CAP:
           </p>
 
           <h3>Settlement prompt</h3>
-          <pre><code>You are a customer-support writer for a food delivery application.
+          <pre class="prompt-block"><code>You are a customer-support writer for a food delivery application.
 
 Write a concise reply based on the complaint, final rulings,
 and refund amount already calculated.
@@ -315,57 +336,12 @@ Approved amount: {{refund_amount}}</code></pre>
             review it and contact you within 24 hours.”
           </p>
 
-          <h2>Architecture</h2>
-          <p>
-            The API handles the quick request path. A queue and worker pool handle the slower adjudication workflow.
-            The ledger stores the dispute, checkpoints, evidence, rulings, and settlement status.
-          </p>
-
-          <figure class="article-diagram">
-            <img
-              src="refund-bench-architecture.png"
-              alt="Architecture flow from customer complaint through a REST API, ledger and transactional outbox, Kafka or SQS, worker pool, frozen evidence, grievance extraction, independent judges, code-based voting and pricing, approval cap, human review, and idempotent settlement."
-            />
-            <figcaption>
-              The model interprets the complaint and writes the explanation; application code controls votes,
-              pricing, approval limits, and payment execution.
-            </figcaption>
-          </figure>
-
-          <pre><code>Customer complaint
-        |
-        v
-Thin REST API -----> Dispute ledger
-        |
-        v
-Transactional outbox
-        |
-        v
-Kafka / SQS queue
-        |
-        v
-Worker pool
-        |
-        +--> Freeze evidence
-        |
-        +--> Extract grievances
-        |          |
-        |          +--> Judge 1 --+
-        |          +--> Judge 2 ----> Count votes in code
-        |          +--> Judge 3 --+
-        |
-        +--> Calculate refund in code
-                     |
-                     +--> Under cap? --> Settlement writer --> Idempotent payment
-                     |
-                     +--> No or uncertain --> Human review</code></pre>
-
           <h2>Call budget and latency</h2>
           <p>
             The call pattern is:
           </p>
 
-          <pre><code>calls = 1 + (N x K) + 1
+          <pre class="code-block"><code>calls = 1 + (N x K) + 1
 
 For four grievances and three judges:
 1 + (4 x 3) + 1 = 14 LLM calls</code></pre>
@@ -409,7 +385,7 @@ For four grievances and three judges:
             minute. Rate-limit responses are therefore expected operating conditions.
           </p>
 
-          <pre><code>Attempt 1: wait 1 second + random jitter
+          <pre class="code-block"><code>Attempt 1: wait 1 second + random jitter
 Attempt 2: wait 2 seconds + random jitter
 Attempt 3: wait 4 seconds + random jitter
 Attempt 4: wait 8 seconds + random jitter</code></pre>
@@ -449,7 +425,7 @@ Attempt 4: wait 8 seconds + random jitter</code></pre>
           </p>
 
           <h2>Complete workflow pseudocode</h2>
-          <pre><code>function process_dispute(complaint_text, order_id):
+          <pre class="code-block"><code>function process_dispute(complaint_text, order_id):
 
     dispute_id = hash(complaint_text + order_id)
 
@@ -551,7 +527,7 @@ Attempt 4: wait 8 seconds + random jitter</code></pre>
             is escalation, not rejection.
           </p>
 
-          <pre><code>Evidence supports claim      -> UPHELD
+          <pre class="code-block"><code>Evidence supports claim      -> UPHELD
 Evidence contradicts claim   -> REJECTED
 Evidence is silent/ambiguous -> ESCALATE</code></pre>
 
@@ -578,7 +554,8 @@ Evidence is silent/ambiguous -> ESCALATE</code></pre>
           <h2>Trade-offs</h2>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Design choice</th><th>Benefit</th><th>Trade-off</th></tr></thead>
+              <caption>Design choices and the operational cost they introduce</caption>
+              <thead><tr><th scope="col">Design choice</th><th scope="col">Benefit</th><th scope="col">Trade-off</th></tr></thead>
               <tbody>
                 <tr><td>Three judges per grievance</td><td>Reduces the impact of one inconsistent response</td><td>Increases call volume and cost</td></tr>
                 <tr><td>Parallel judging</td><td>Reduces latency</td><td>Requires rate-limit and concurrency controls</td></tr>
@@ -629,6 +606,6 @@ Evidence is silent/ambiguous -> ESCALATE</code></pre>
     </main>
 
     <div data-include="footer.html"></div>
-    <script src="../../../script.js"></script>
+    <script src="../../script.js"></script>
   </body>
 </html>
